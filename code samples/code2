@@ -1,0 +1,33 @@
+using System;
+using System.Threading;
+using System.Threading.Tasks;
+ 
+namespace HelloApp
+{
+    class Program
+    {
+        static long Factorial(int n)
+        {
+            long result = 1;
+            for (int i = 1; i <= n; i++)
+            {
+                result *= i;
+            }
+            return result;
+        }
+        // определение асинхронного метода
+        static async void FactorialAsync(int n)
+        {
+            long x = await Task.Run(()=>Factorial(n));
+            Console.WriteLine($"Факториал равен {x}");
+        }
+        static void Main(string[] args)
+        {
+            //FactorialAsync(50);
+            FactorialAsync(23);
+            Console.WriteLine("Some small job");
+            FactorialAsync(4);
+            Console.Read();
+        }
+    }
+}

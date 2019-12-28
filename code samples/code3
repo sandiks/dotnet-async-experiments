@@ -1,0 +1,38 @@
+using System;
+using System.Threading.Tasks;
+
+class Program
+{
+    static void Main()
+    {
+        while (true)
+        {
+            // Start computation.
+            Example();
+            // Handle user input.
+            string result = Console.ReadLine();
+            Console.WriteLine("You typed: " + result);
+        }
+    }
+
+    static async void Example()
+    {
+        int t = await Task.Run(() => Allocate());
+        System.Console.WriteLine($"result {t}");
+    }
+
+    static int Allocate()
+    {
+        // Compute total count of digits in strings.
+        int size = 0;
+        for (int z = 0; z < 500; z++)
+        {
+            for (int i = 0; i < 100_000; i++)
+            {
+                string value = i.ToString();
+                size += value.Length;
+            }
+        }
+        return size;
+    }
+}
