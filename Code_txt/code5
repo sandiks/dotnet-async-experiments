@@ -1,0 +1,76 @@
+using System;
+using System.Collections.Generic;
+using System.Threading;
+using System.Threading.Tasks;
+
+class Program
+{
+    static Random rand = new Random();
+
+    static void Main()
+    {
+        List<int[]> storage = new List<int[]>(100);
+        while (true)
+        {
+            string input_number = Console.ReadLine();
+            int size = 0;
+            if (Int32.TryParse(input_number, out size))
+            {
+            }
+            if (size < 1000 || size > 1000_000)
+                size = 1000_000;
+
+            Console.WriteLine($"Current size: {size} list size {storage.Count}");
+
+            AddToStorage(size, storage);
+
+        }
+    }
+
+    static async void AddToStorage(int size, List<int[]> storage)
+    {
+        var data = await Task.Run(() => Generate(size));
+        storage.Add(data);
+        System.Console.WriteLine($"generate new array length:{data.Length}");
+    }
+
+    static int[] Generate(int size)
+    {
+        var data = new int[size];
+        for (int i = 0; i < size; i++)
+        {
+            data[i] = rand.Next(10000);
+        }
+        Thread.Sleep(2000);
+        return data;
+    }
+}
+
+---------------------------------------------
+
+using System;
+using System.IO;
+using System.Threading.Tasks;
+
+public class Example
+{
+    public static void Main()
+    {
+        Task[] tasks = new Task[2];
+        String[] files = null;
+        String[] dirs = null;
+
+        String docsDirectory = "/home/kilk/Documents";//Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+        System.Console.WriteLine( String.Join(";",Directory.GetFiles(docsDirectory)) );
+
+        tasks[0] = Task.Factory.StartNew(() => files = Directory.GetFiles(docsDirectory));
+        tasks[1] = Task.Factory.StartNew(() => dirs = Directory.GetDirectories(docsDirectory));
+
+        Task.Factory.ContinueWhenAll(tasks, completedTasks =>
+        {
+            Console.WriteLine("{0} contains: ", docsDirectory);
+            Console.WriteLine("   {0} subdirectories", dirs.Length);
+            Console.WriteLine("   {0} files", files.Length);
+        });
+    }
+}

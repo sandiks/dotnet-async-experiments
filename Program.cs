@@ -1,47 +1,60 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
 
-class Program
+public class Example
 {
-    static Random rand = new Random();
-
-    static void Main()
+    static void Main(string[] args)
     {
-        List<int[]> storage = new List<int[]>(100);
-        while (true)
-        {
-            string input_number = Console.ReadLine();
-            int size = 0;
-            if (Int32.TryParse(input_number, out size))
-            {
-            }
-            if (size < 1 || size > 1000_000)
-                size = 1000_000;
-
-            Console.WriteLine($"Current size: {size} list size {storage.Count}");
-
-            AddToStorage(size, storage);
-
-        }
+        WriteOutput("main/Program Begin");
+        DoAsTask();
+        //   DoAsAsync();
+        WriteOutput("main/Program End");
+        Console.ReadLine();
     }
 
-    static async void AddToStorage(int size, List<int[]> storage)
+    static void DoAsTask()
     {
-        var data = await Task.Run(() => Generate(size));
-        storage.Add(data);
-        System.Console.WriteLine($"generate new array length:{data.Length}");
+        WriteOutput("1 - Starting");
+        var t = Task.Factory.StartNew<int>(DoSomethingThatTakesTime);
+        WriteOutput("2 - Task started");
+        t.Wait();
+        WriteOutput("3 - Task completed with result: " + t.Result);
     }
 
-    static int[] Generate(int size)
+    static Task DoAsTask2()
     {
-        var data = new int[size];
-        for (int i = 0; i < size; i++)
-        {
-            data[i] = rand.Next(10000);
-        }
-        Thread.Sleep(2000);
-        return data;
+        WriteOutput("1 - Starting");
+        var t = Task.Factory.StartNew<int>(DoSomethingThatTakesTime, TaskCreationOptions.HideScheduler); //<-- HideScheduler do the magic
+
+        TaskCompletionSource<int> tsc = new TaskCompletionSource<int>();
+        t.ContinueWith(tsk => tsc.TrySetResult(tsk.Result)); //<-- Set the result to the created Task
+
+        WriteOutput("2 - Task started");
+
+        tsc.Task.ContinueWith(tsk => WriteOutput("3 - Task completed with result: " + tsk.Result)); //<-- Complete the Task
+        return tsc.Task;
+    }
+
+    static async Task DoAsAsync()
+    {
+        WriteOutput("1 - Starting");
+        var t = Task.Factory.StartNew<int>(DoSomethingThatTakesTime);
+        WriteOutput("2 - Task started");
+        var result = await t;
+        WriteOutput("3 - Task completed with result: " + result);
+    }
+
+    static int DoSomethingThatTakesTime()
+    {
+        WriteOutput("A - Started something");
+        Thread.Sleep(5000);
+        WriteOutput("B - Completed something");
+        return 123;
+    }
+
+    static void WriteOutput(string message)
+    {
+        Console.WriteLine("[{0}] {1}", Thread.CurrentThread.ManagedThreadId, message);
     }
 }
